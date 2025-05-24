@@ -34,6 +34,7 @@ def os_lib_dir = Os.isFamily(Os.FAMILY_WINDOWS)? "bin" : "lib"
 def os_script_extension = Os.isFamily(Os.FAMILY_WINDOWS)? ".bat" : ""
 def libclang_dir = "${llvm_home}/${os_lib_dir}"
 checkPath(libclang_dir)
+def os_compiler_name = Os.isFamily(Os.FAMILY_WINDOWS)? "javac.exe" : "javac"
 
 repositories {
     mavenCentral()
@@ -43,7 +44,7 @@ compileJava {
     options.release = 21
     options.compilerArgs << "--enable-preview"
     options.fork = true
-    options.forkOptions.executable = "${jdk21_home}/bin/javac"
+    options.forkOptions.executable = "${jdk21_home}/bin/${os_compiler_name}"
 }
 
 jar {
@@ -85,12 +86,12 @@ task createJextractJmod(type: Exec) {
 
     executable = "${jdk21_home}/bin/jmod"
     args = [
-          "create",
-          "--module-version=$jextract_version",
-          "--class-path=" + jar.archiveFile.get(),
-          "--libs=$jextract_jmod_libs_dir",
-          "--conf=$jextract_jmod_conf_dir",
-          "${jextract_jmod_file}"
+            "create",
+            "--module-version=$jextract_version",
+            "--class-path=" + jar.archiveFile.get(),
+            "--libs=$jextract_jmod_libs_dir",
+            "--conf=$jextract_jmod_conf_dir",
+            "${jextract_jmod_file}"
     ]
 }
 
@@ -102,8 +103,8 @@ task createJextractImage(type: Exec) {
     outputs.dir(jextract_app_dir)
 
     def quote_jlink_opts = Os.isFamily(Os.FAMILY_WINDOWS)?
-        '\\"--enable-native-access=org.openjdk.jextract\\" \\"--enable-preview\""' :
-        '"--enable-native-access=org.openjdk.jextract" "--enable-preview"'
+            '\\"--enable-native-access=org.openjdk.jextract\\" \\"--enable-preview\""' :
+            '"--enable-native-access=org.openjdk.jextract" "--enable-preview"'
 
     doFirst {
         delete(jextract_app_dir)
@@ -111,12 +112,12 @@ task createJextractImage(type: Exec) {
 
     executable = "${jdk21_home}/bin/jlink"
     args = [
-         "--module-path=$jmods_dir",
-         "--add-modules=org.openjdk.jextract,jdk.compiler,jdk.zipfs",
-         "--output=${jextract_app_dir}",
-         "--launcher=jextract=org.openjdk.jextract/org.openjdk.jextract.JextractTool",
-         "--add-options",
-         "${quote_jlink_opts}"
+            "--module-path=$jmods_dir",
+            "--add-modules=org.openjdk.jextract,jdk.compiler,jdk.zipfs",
+            "--output=${jextract_app_dir}",
+            "--launcher=jextract=org.openjdk.jextract/org.openjdk.jextract.JextractTool",
+            "--add-options",
+            "${quote_jlink_opts}"
     ]
 }
 
@@ -147,20 +148,20 @@ task createRuntimeImageForTest(type: Exec) {
 
     executable = "${jdk21_home}/bin/jlink"
     args = [
-         "--module-path=$jmods_dir" + File.pathSeparator + "$jdk21_home/jmods",
-         "--add-modules=ALL-MODULE-PATH",
-         "--output=$out_dir",
+            "--module-path=$jmods_dir" + File.pathSeparator + "$jdk21_home/jmods",
+            "--add-modules=ALL-MODULE-PATH",
+            "--output=$out_dir",
     ]
 }
 
 task cmakeConfigure(type: Exec) {
     executable = "cmake"
     args = [
-        "-B", "$buildDir/testlib-build",
-        "-S", "$projectDir/test/test-support",
-        "-DTEST_SOURCE_ROOT:FILEPATH=$projectDir/test",
-        "-DCMAKE_BUILD_TYPE:STRING=Release",
-        "-DCMAKE_INSTALL_PREFIX:FILEPATH=$buildDir/testlib-install"
+            "-B", "$buildDir/testlib-build",
+            "-S", "$projectDir/test/test-support",
+            "-DTEST_SOURCE_ROOT:FILEPATH=$projectDir/test",
+            "-DCMAKE_BUILD_TYPE:STRING=Release",
+            "-DCMAKE_INSTALL_PREFIX:FILEPATH=$buildDir/testlib-install"
     ]
 }
 
@@ -169,9 +170,9 @@ task cmakeBuild(type: Exec) {
 
     executable = "cmake"
     args = [
-        "--build", "$buildDir/testlib-build",
-        "--config", "Release",
-        "--target", "install"
+            "--build", "$buildDir/testlib-build",
+            "--config", "Release",
+            "--target", "install"
     ]
 }
 
